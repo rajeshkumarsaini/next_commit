@@ -1,0 +1,998 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Next Commit</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=Figtree:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: calm single column; one focused card per question; world colors carry meaning everywhere */
+:root{
+  --bg:#F2F4F0; --surface:#FFFFFF; --sunk:#E6EAE3; --ink:#15211D; --muted:#5A6862; --line:#D3DAD2;
+  --accent:#E8492A; --accent-ink:#FFFFFF;
+  --w-build:#4B5FD6; --w-industry:#0E8A7A; --w-people:#C98200; --w-own:#E8492A;
+  --display:"Bricolage Grotesque", "Avenir Next", system-ui, sans-serif;
+  --body:"Figtree", "Segoe UI", system-ui, sans-serif;
+  --mono:"JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --r:14px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0F1513; --surface:#18201D; --sunk:#202A26; --ink:#E9EFEB; --muted:#9AA8A1; --line:#2E3A35;
+  --accent:#FF6B4A; --accent-ink:#1A0D08;
+  --w-build:#8C9BFF; --w-industry:#2CC2AE; --w-people:#F0B23A; --w-own:#FF6B4A; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0F1513; --surface:#18201D; --sunk:#202A26; --ink:#E9EFEB; --muted:#9AA8A1; --line:#2E3A35;
+  --accent:#FF6B4A; --accent-ink:#1A0D08;
+  --w-build:#8C9BFF; --w-industry:#2CC2AE; --w-people:#F0B23A; --w-own:#FF6B4A; color-scheme:dark}
+
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1080px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1,h2,h3{font-family:var(--display);line-height:1.05;text-wrap:balance;margin:0;letter-spacing:-.02em}
+h2{font-size:clamp(1.7rem,3.6vw,2.4rem);font-weight:800}
+h3{font-size:1.2rem;font-weight:600;letter-spacing:-.01em}
+p{margin:0}
+a{color:inherit}
+.eyebrow{font-family:var(--mono);font-size:.74rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.lede{color:var(--muted);max-width:62ch;font-size:1.06rem}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:3px solid var(--accent);outline-offset:3px;border-radius:8px}
+.btn{display:inline-flex;align-items:center;gap:.6rem;border:0;border-radius:999px;padding:.95rem 1.5rem;font-weight:700;font-size:1rem;background:var(--accent);color:var(--accent-ink);transition:transform .15s ease}
+.btn:hover{transform:translateY(-2px)}
+.btn.ghost{background:transparent;color:var(--ink);border:1.5px solid var(--line)}
+.btn.small{padding:.6rem 1rem;font-size:.9rem}
+
+.top{display:flex;justify-content:space-between;align-items:center;padding-block:18px}
+.logo{font-family:var(--mono);font-weight:600;font-size:.95rem;display:flex;gap:.5rem;align-items:center;background:none;border:0;padding:0}
+.logo i{width:12px;height:12px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 4px color-mix(in srgb,var(--accent) 22%,transparent)}
+
+.hero{display:grid;grid-template-columns:1.25fr 1fr;gap:48px;align-items:center;padding-block:40px 64px}
+.hero h1{font-size:clamp(2.6rem,6.6vw,4.9rem);font-weight:800}
+.hero h1 em{font-style:normal;color:var(--accent)}
+.hero .lede{margin-top:20px}
+.hero-cta{display:flex;flex-wrap:wrap;gap:12px;margin-top:28px;align-items:center}
+.meta{display:flex;flex-wrap:wrap;gap:8px 18px;margin-top:22px;font-family:var(--mono);font-size:.8rem;color:var(--muted)}
+.meta span::before{content:"✓ ";color:var(--w-industry)}
+.gitlog{background:var(--ink);color:var(--bg);border-radius:var(--r);padding:22px 22px 18px;font-family:var(--mono);font-size:.84rem;line-height:1.9;min-width:0;overflow-x:auto}
+.gitlog .h{opacity:.55}
+.gitlog .c{display:flex;gap:10px;white-space:nowrap}
+.gitlog .dot{display:inline-block;width:10px;height:10px;border-radius:50%;border:2px solid currentColor;margin-top:.55em;flex:none}
+.gitlog .sha{opacity:.55}
+.gitlog .you{color:var(--accent);font-weight:600}
+.gitlog .you .dot{background:var(--accent);border-color:var(--accent);animation:pulse 2s infinite}
+.gitlog .branches{margin-top:10px;padding-top:10px;border-top:1px dashed color-mix(in srgb,var(--bg) 30%,transparent);display:grid;grid-template-columns:1fr 1fr;gap:4px 14px;font-size:.78rem}
+.gitlog .branches b{font-weight:600}
+.pathmap{margin:0;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:20px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.pathmap svg{width:100%;height:auto;display:block}
+.pm-cap{display:flex;flex-direction:column;gap:4px}
+.pm-cap b{font-family:var(--display);font-size:1.15rem;font-weight:600;letter-spacing:-.01em}
+.pm-foot{font-size:.86rem;color:var(--muted)}
+.pm-b{stroke-dasharray:320;animation:pmdraw 1.1s cubic-bezier(.3,.7,.3,1) both}
+@keyframes pmdraw{from{stroke-dashoffset:320}to{stroke-dashoffset:0}}
+.pm-pulse{transform-box:fill-box;transform-origin:center;animation:pmpulse 2.4s ease-in-out infinite}
+@keyframes pmpulse{50%{transform:scale(1.35);opacity:.06}}
+@keyframes pulse{50%{box-shadow:0 0 0 6px color-mix(in srgb,var(--accent) 25%,transparent)}}
+
+section.block{padding-block:56px;border-top:1px solid var(--line)}
+.sec-head{display:flex;flex-direction:column;gap:12px;margin-bottom:28px}
+
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:20px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.stat .n{font-family:var(--display);font-weight:800;font-size:2.2rem;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+.stat .n.down{color:var(--accent)} .stat .n.up{color:var(--w-industry)}
+.stat p{font-size:.92rem;color:var(--muted)}
+.stat a{font-family:var(--mono);font-size:.72rem;color:var(--muted);margin-top:auto}
+.takeaway{margin-top:18px;padding:18px 20px;border-radius:var(--r);background:var(--sunk);font-size:1rem}
+
+/* worlds + explorer */
+.worlds{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
+.world{padding:16px 0 4px;border-top:4px solid var(--wc);display:flex;flex-direction:column;gap:4px}
+.world b{font-family:var(--display);font-size:1.1rem}
+.world span{font-size:.86rem;color:var(--muted)}
+.filters{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px}
+.chip{border:1.5px solid var(--line);background:var(--surface);border-radius:999px;padding:.5rem .95rem;font-weight:600;font-size:.92rem}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.careers{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.career{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:18px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.career .top-row{display:flex;justify-content:space-between;gap:8px;align-items:center}
+.tag{display:inline-flex;font-family:var(--mono);font-size:.68rem;letter-spacing:.06em;text-transform:uppercase;padding:.22rem .55rem;border-radius:999px;color:var(--ink);background:color-mix(in srgb,var(--wc) 18%,transparent)}
+.outlook{font-family:var(--mono);font-size:.68rem;color:var(--muted);white-space:nowrap}
+.career h3{font-size:1.18rem}
+.career p{font-size:.92rem;color:var(--muted)}
+.career-pay{font-size:.86rem!important;color:var(--ink)!important}
+.career-pay b{font-variant-numeric:tabular-nums}
+.career-cos{display:flex;flex-direction:column;gap:6px}
+.career-cos a{display:flex;align-items:center;gap:8px;font-size:.86rem;font-weight:600;text-decoration:none;color:var(--ink)}
+.career-cos a:hover{text-decoration:underline}
+.mono.sm{width:24px;height:24px;border-radius:6px;font-size:.62rem}
+.career .jobs{font-size:.8rem;font-family:var(--mono);color:var(--muted);margin-top:auto}
+
+.inspo{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.inspo div{padding:18px 0;border-top:2px solid var(--ink);display:flex;flex-direction:column;gap:6px}
+.inspo b{font-family:var(--display);font-size:1.05rem}
+.inspo p{font-size:.92rem;color:var(--muted)}
+
+.vibe{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+.vibe-reply{margin-top:14px;min-height:1.6em;color:var(--muted);max-width:60ch}
+
+/* quiz */
+.quiz{padding-block:24px 64px;max-width:760px;margin:0 auto}
+.progress{display:flex;gap:4px;margin-bottom:28px}
+.progress i{flex:1;height:6px;border-radius:3px;background:var(--sunk);transition:background .3s}
+.progress i.done{background:var(--ink)}
+.progress i.now{background:var(--accent)}
+.qmeta{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;gap:12px}
+.qnum{font-family:var(--mono);font-size:.85rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.qtopic{font-family:var(--mono);font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;padding:.3rem .7rem;border-radius:999px;background:var(--sunk)}
+.qtitle{font-size:clamp(1.7rem,4.4vw,2.6rem);font-weight:800;margin-bottom:28px}
+.opts{display:grid;gap:10px}
+.opt{display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:center;text-align:left;padding:15px 18px;border-radius:var(--r);border:1.5px solid var(--line);background:var(--surface);transition:transform .12s ease,border-color .12s ease;font-size:1.02rem}
+.opt:hover{border-color:var(--ink);transform:translateX(3px)}
+.opt .k{font-family:var(--mono);font-size:.78rem;width:28px;height:28px;border-radius:8px;display:grid;place-items:center;background:var(--sunk);font-weight:600}
+.opt[aria-checked="true"]{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 9%,var(--surface))}
+.opt[aria-checked="true"] .k{background:var(--accent);color:var(--accent-ink)}
+.qnav{display:flex;justify-content:space-between;align-items:center;margin-top:24px;gap:12px}
+.hint{font-size:.8rem;color:var(--muted);font-family:var(--mono)}
+.card-in{animation:cardin .35s ease both}
+@keyframes cardin{from{opacity:.25;transform:translateY(10px)}to{opacity:1;transform:none}}
+.reassure{margin-top:28px;padding:14px 16px;border-radius:12px;background:var(--sunk);font-size:.92rem;color:var(--muted)}
+
+/* results */
+.res-hero{padding-block:32px 40px;display:grid;grid-template-columns:1.2fr 1fr;gap:40px;align-items:center}
+.res-hero .eyebrow{color:var(--ink)}
+.res-hero h1{font-size:clamp(2.4rem,6vw,4.4rem);font-weight:800;margin-top:10px}
+.res-hero h1 span{color:var(--wc)}
+.res-hero .lede{margin-top:16px}
+.bars{display:grid;gap:14px}
+.bars-title{font-family:var(--mono);font-size:.74rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.bar{display:grid;grid-template-columns:10rem 1fr 3rem;gap:12px;align-items:center;font-size:.92rem}
+.bar .track,.bar .fill{display:block}
+.bar .track{height:12px;border-radius:6px;background:var(--sunk);overflow:hidden}
+.bar .fill{height:100%;border-radius:6px;background:var(--wc);width:0;transition:width .9s cubic-bezier(.2,.8,.2,1)}
+.bar .pct{font-family:var(--mono);text-align:right;font-variant-numeric:tabular-nums}
+.bar.top .name{font-weight:700}
+.bar .sub{display:block;font-size:.74rem;color:var(--muted)}
+.top3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px}
+.pick{background:var(--surface);border:1.5px solid var(--line);border-radius:var(--r);padding:16px 18px;text-align:left;display:flex;flex-direction:column;gap:6px;min-width:0}
+.pick .rank{font-family:var(--mono);font-size:.72rem;color:var(--muted);display:flex;justify-content:space-between}
+.pick b{font-family:var(--display);font-size:1.15rem;font-weight:600}
+.pick[aria-selected="true"]{border-color:var(--wc);box-shadow:inset 0 -4px 0 var(--wc)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:24px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.panel h3{font-size:1.25rem}
+.panel .lede{font-size:1rem}
+.why li{margin-bottom:10px}
+.why li small{display:block;font-family:var(--mono);font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+ul.clean{list-style:none;padding:0;margin:0}
+.roles li{padding:10px 0;border-bottom:1px solid var(--line);font-size:.95rem}
+.roles li:last-child{border-bottom:0}
+.skills{display:flex;flex-wrap:wrap;gap:8px}
+.skills span{padding:.45rem .8rem;border-radius:999px;font-size:.88rem;font-weight:600;background:color-mix(in srgb,var(--wc) 13%,transparent);border:1px solid color-mix(in srgb,var(--wc) 35%,transparent)}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:0}
+.steps div{padding:16px 18px 16px 0;border-top:3px solid var(--wc);display:flex;flex-direction:column;gap:6px;margin-right:12px}
+.steps b{font-family:var(--mono);font-size:.74rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.steps p{font-size:.95rem}
+.watch{border-left:4px solid var(--wc);padding:4px 0 4px 16px;color:var(--muted)}
+.radar-wrap{display:grid;grid-template-columns:minmax(0,320px) 1fr;gap:24px;align-items:center}
+.radar-wrap svg{width:100%;height:auto;max-width:340px}
+.vals{display:grid;gap:6px;font-size:.92rem}
+.vals div{display:flex;justify-content:space-between;gap:10px;border-bottom:1px dashed var(--line);padding-bottom:6px}
+.vals b{font-family:var(--mono);font-weight:600;font-variant-numeric:tabular-nums}
+.allrank{display:grid;grid-template-columns:1fr 1fr;gap:10px 32px}
+.door{background:var(--ink);color:var(--bg);border-radius:var(--r);padding:28px;display:grid;grid-template-columns:1fr auto;gap:20px;align-items:center}
+.door h3{font-size:1.5rem}
+.door p{opacity:.8;margin-top:8px;max-width:62ch}
+.door .btn.ghost{color:var(--bg);border-color:color-mix(in srgb,var(--bg) 35%,transparent)}
+.res-actions{display:flex;flex-wrap:wrap;gap:10px}
+/* companies, pay, apply guide */
+.cos{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.co{border:1px solid var(--line);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:10px;min-width:0;background:var(--bg)}
+.co-head{display:flex;gap:12px;align-items:center;min-width:0}
+.mono{flex:none;width:44px;height:44px;border-radius:11px;display:grid;place-items:center;font-family:var(--display);font-weight:800;font-size:1rem;letter-spacing:-.02em;color:var(--surface);background:var(--mc)}
+.co-name{font-weight:700;line-height:1.2}
+.co-hq{font-size:.8rem;color:var(--muted)}
+.co-links{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:auto}
+.co-links a{font-size:.86rem;font-weight:600;text-decoration-thickness:1.5px;text-underline-offset:3px;color:var(--ink)}
+.star{border:1.5px solid var(--line);background:transparent;border-radius:999px;padding:.25rem .65rem;font-size:.78rem;font-weight:600;white-space:nowrap}
+.star[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.pay{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.pay div{background:var(--bg);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:4px}
+.pay .amt{font-family:var(--display);font-weight:800;font-size:1.6rem;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.pay small{font-size:.8rem;color:var(--muted)}
+.src-note{font-size:.76rem;color:var(--muted)}
+.src-note a{color:var(--muted)}
+.growth{display:grid;gap:8px}
+.growth li{display:grid;grid-template-columns:5.5rem 1fr;gap:12px;font-size:.94rem;padding:8px 0;border-bottom:1px dashed var(--line)}
+.growth li:last-child{border-bottom:0}
+.growth b{font-family:var(--mono);font-size:.74rem;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);padding-top:2px}
+.guide-top{display:flex;justify-content:space-between;align-items:end;gap:16px;flex-wrap:wrap;margin-bottom:16px}
+.meter{height:10px;border-radius:5px;background:var(--sunk);overflow:hidden;width:min(320px,100%)}
+.meter i{display:block;height:100%;background:var(--accent);width:0;transition:width .4s}
+.guide{list-style:none;padding:0;margin:0;display:grid;gap:10px;counter-reset:g}
+.gstep{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:18px 20px;display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:start}
+.gstep input{width:22px;height:22px;margin:3px 0 0;accent-color:var(--accent)}
+.gstep h3{font-size:1.08rem;display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+.gstep h3 .when{font-family:var(--mono);font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:400}
+.gstep p,.gstep li{font-size:.94rem;color:var(--muted)}
+.gstep ul{margin:6px 0 0;padding-left:18px}
+.gstep.done h3{text-decoration:line-through;text-decoration-color:var(--muted)}
+.gstep.done{opacity:.7}
+.tmpl{margin-top:10px;background:var(--bg);border-radius:10px;padding:12px 14px;font-size:.9rem;color:var(--ink);white-space:pre-wrap}
+.shortlist{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.shortlist span{font-size:.82rem;font-weight:600;padding:.25rem .6rem;border-radius:999px;background:var(--sunk);color:var(--ink)}
+@media (max-width:900px){.cos{grid-template-columns:1fr 1fr}}
+@media (max-width:600px){.cos,.pay{grid-template-columns:1fr}.growth li{grid-template-columns:1fr;gap:2px}}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:.7rem 1.1rem;border-radius:999px;font-weight:600;font-size:.9rem;z-index:50}
+
+.breathe{position:fixed;inset:0;background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(6px);display:grid;place-items:center;z-index:40;padding:24px}
+.breathe-box{text-align:center;display:flex;flex-direction:column;align-items:center;gap:22px}
+.orb{width:200px;height:200px;border-radius:50%;background:radial-gradient(circle at 35% 35%,color-mix(in srgb,var(--w-industry) 70%,var(--surface)),var(--w-industry));transform:scale(.55);transition:transform 4s ease-in-out}
+.orb.big{transform:scale(1)}
+.breathe-say{font-family:var(--display);font-size:1.8rem;font-weight:600}
+.breathe-sub{color:var(--muted);font-family:var(--mono);font-size:.8rem}
+
+footer{padding-block:40px 56px;border-top:1px solid var(--line);color:var(--muted);font-size:.85rem;display:flex;flex-direction:column;gap:10px}
+footer .src a{margin-right:14px;white-space:nowrap}
+
+@media (max-width:900px){
+  .hero,.res-hero{grid-template-columns:1fr;gap:28px}
+  .stats,.worlds{grid-template-columns:repeat(2,1fr)}
+  .careers{grid-template-columns:repeat(2,1fr)}
+  .inspo,.grid2,.allrank{grid-template-columns:1fr}
+  .radar-wrap{grid-template-columns:1fr;justify-items:center}
+  .door{grid-template-columns:1fr}
+}
+@media (max-width:600px){
+  .stats,.careers,.top3,.steps{grid-template-columns:1fr}
+  .bar{grid-template-columns:7.6rem 1fr 2.6rem;font-size:.85rem}
+  .hint{display:none}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head><body>
+
+<div class="wrap">
+  <header class="top">
+    <button class="logo" id="logoBtn" aria-label="Next Commit home"><i></i>next_commit</button>
+    <button class="btn ghost small" id="breatheBtn">Take 30 seconds</button>
+  </header>
+</div>
+
+<!-- HOME -->
+<main id="home">
+  <div class="wrap">
+    <div class="hero">
+      <div>
+        <p class="eyebrow">Career check-in for new CS grads</p>
+        <h1 style="margin-top:14px">Your first job doesn't need to be <em>perfect</em>. It just needs to fit you.</h1>
+        <p class="lede">AI is changing tech jobs fast, and that's stressful. Answer 15 easy questions about how you like to live, work and spend your time. We'll match you with careers that are growing, from AI and cybersecurity to climate tech, health tech and starting your own thing.</p>
+        <div class="hero-cta">
+          <button class="btn" id="startBtn">Start (about 4 minutes) →</button>
+          <button class="btn ghost" id="resumeBtn" hidden>See my last result</button>
+        </div>
+        <div class="meta"><span>15 everyday questions</span><span>14 future careers</span><span>42 internship &amp; new-grad programs</span><span>Pay ranges + apply plan</span><span>No sign-up</span><span>No wrong answers</span></div>
+      </div>
+      <figure class="pathmap" aria-label="Map: from graduation to a fork with four career directions">
+        <p class="pm-cap"><span class="eyebrow">Your map</span><b>Graduation is a fork in the road, not a cliff.</b></p>
+        <svg viewBox="0 0 420 424" role="img" aria-hidden="true">
+          <defs><pattern id="pmgrid" width="18" height="18" patternUnits="userSpaceOnUse"><circle cx="1.5" cy="1.5" r="1.2" fill="var(--line)"/></pattern></defs>
+          <rect x="0" y="0" width="420" height="424" rx="12" fill="url(#pmgrid)"/>
+          <g transform="translate(0,34)">
+          <path d="M210 350 L210 222" stroke="var(--ink)" stroke-width="6" stroke-linecap="round" fill="none"/>
+          <path class="pm-b" style="animation-delay:.2s" d="M210 222 C 210 165, 62 175, 58 100" stroke="var(--w-build)" stroke-width="5" stroke-linecap="round" fill="none"/>
+          <path class="pm-b" style="animation-delay:.35s" d="M210 222 C 210 150, 160 135, 160 66" stroke="var(--w-industry)" stroke-width="5" stroke-linecap="round" fill="none"/>
+          <path class="pm-b" style="animation-delay:.5s" d="M210 222 C 210 150, 260 135, 260 66" stroke="var(--w-people)" stroke-width="5" stroke-linecap="round" fill="none"/>
+          <path class="pm-b" style="animation-delay:.65s" d="M210 222 C 210 165, 358 175, 362 100" stroke="var(--w-own)" stroke-width="5" stroke-linecap="round" fill="none"/>
+          <g stroke="var(--ink)" stroke-width="2.5" stroke-linecap="round">
+            <line x1="58" y1="100" x2="58" y2="58"/><line x1="160" y1="66" x2="160" y2="24"/><line x1="260" y1="66" x2="260" y2="24"/><line x1="362" y1="100" x2="362" y2="58"/>
+          </g>
+          <path d="M59 58 h28 l-7 9 l7 9 h-28z" fill="var(--w-build)"/>
+          <path d="M161 24 h28 l-7 9 l7 9 h-28z" fill="var(--w-industry)"/>
+          <path d="M261 24 h28 l-7 9 l7 9 h-28z" fill="var(--w-people)"/>
+          <path d="M363 58 h28 l-7 9 l7 9 h-28z" fill="var(--w-own)"/>
+          <g font-family="Figtree, system-ui, sans-serif" font-size="13" font-weight="700" fill="var(--ink)" text-anchor="middle">
+            <text x="58" y="26">Build</text><text x="58" y="41">the Tech</text>
+            <text x="160" y="-8">Tech + an</text><text x="160" y="7">Industry</text>
+            <text x="260" y="-8">People &amp;</text><text x="260" y="7">Strategy</text>
+            <text x="362" y="26">Start</text><text x="362" y="41">Your Own</text>
+          </g>
+          <circle cx="210" cy="222" r="9" fill="var(--surface)" stroke="var(--ink)" stroke-width="3"/>
+          <circle cx="210" cy="286" r="6" fill="var(--ink)"/>
+          <g font-family="Figtree, system-ui, sans-serif" font-size="13" fill="var(--muted)">
+            <text x="228" y="226" font-weight="700" fill="var(--ink)">Choose a direction</text>
+            <text x="228" y="290">First job or internship</text>
+            <text x="246" y="357">Graduation</text>
+          </g>
+          <circle class="pm-pulse" cx="210" cy="352" r="22" fill="var(--accent)" opacity=".18"/>
+          <path d="M210 336 l26 11 l-26 11 l-26 -11z" fill="var(--ink)"/>
+          <path d="M197 352 v9 c0 5 26 5 26 0 v-9" fill="var(--ink)"/>
+          <line x1="232" y1="349" x2="232" y2="362" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round"/>
+          <g font-family="JetBrains Mono, ui-monospace, monospace" font-size="11" font-weight="600" fill="var(--accent)" text-anchor="end"><text x="176" y="356">YOU ARE HERE</text></g>
+          </g>
+        </svg>
+        <p class="pm-foot">Every direction has good jobs. Most people switch at least once, and your skills come with you.</p>
+      </figure>
+    </div>
+  </div>
+
+  <section class="block">
+    <div class="wrap">
+      <div class="sec-head">
+        <p class="eyebrow">Vibe check</p>
+        <h2>First, how are you feeling about all this?</h2>
+      </div>
+      <div class="vibe" role="group" aria-label="How are you feeling">
+        <button class="chip" data-vibe="anxious" aria-pressed="false">Anxious</button>
+        <button class="chip" data-vibe="lost" aria-pressed="false">Honestly lost</button>
+        <button class="chip" data-vibe="curious" aria-pressed="false">Curious</button>
+        <button class="chip" data-vibe="excited" aria-pressed="false">Excited</button>
+        <button class="chip" data-vibe="numb" aria-pressed="false">Too tired to care</button>
+      </div>
+      <p class="vibe-reply" id="vibeReply">Pick one. It doesn't change your score. It just helps us talk to you the right way.</p>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="wrap">
+      <div class="sec-head">
+        <p class="eyebrow">What's actually happening</p>
+        <h2>Jobs are changing, not disappearing.</h2>
+        <p class="lede">You've probably seen headlines saying "AI will take all the coding jobs." Here's what the numbers really say.</p>
+      </div>
+      <div class="stats">
+        <div class="stat"><span class="n up">+78M</span><p>More jobs worldwide by 2030 than today. AI, data and cybersecurity are the fastest-growing skills.</p><a href="https://www.weforum.org/press/2025/01/future-of-jobs-report-2025-78-million-new-job-opportunities-by-2030-but-urgent-upskilling-needed-to-prepare-workforces/" target="_blank" rel="noopener">World Economic Forum ↗</a></div>
+        <div class="stat"><span class="n down">−25%</span><p>Fewer new-grad hires at the 15 biggest tech companies (2023 to 2024). Big Tech isn't the only door anymore.</p><a href="https://spectrum.ieee.org/ai-effect-entry-level-jobs" target="_blank" rel="noopener">SignalFire via IEEE Spectrum ↗</a></div>
+        <div class="stat"><span class="n down">−27.5%</span><p>Drop in US jobs that are mostly just writing code. Jobs that mix code with design and judgment barely moved (−0.3%).</p><a href="https://spectrum.ieee.org/ai-effect-entry-level-jobs" target="_blank" rel="noopener">US Labor data via IEEE Spectrum ↗</a></div>
+        <div class="stat"><span class="n up">61%</span><p>of employers say they are not replacing entry-level jobs with AI. Many plan to give new hires AI tools instead.</p><a href="https://spectrum.ieee.org/ai-effect-entry-level-jobs" target="_blank" rel="noopener">NACE Job Outlook 2026 ↗</a></div>
+      </div>
+      <p class="takeaway"><b>Bottom line:</b> your CS degree opens many more doors than "software engineer at a big tech company." The careers below all mix tech with something AI can't easily do on its own: understanding people, an industry, a mission, or a business.</p>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="wrap">
+      <div class="sec-head">
+        <p class="eyebrow">Explore the options</p>
+        <h2>14 future-ready careers, in 4 worlds</h2>
+        <p class="lede">You don't have to pick from this list right now. Browse it, then take the check-in to see which ones fit you best.</p>
+      </div>
+      <div class="worlds" id="worlds"></div>
+      <div class="filters" id="filters" role="group" aria-label="Filter careers by world"></div>
+      <div class="careers" id="careerGrid"></div>
+      <p class="takeaway" style="background:transparent;padding:14px 0 0;color:var(--muted);font-size:.85rem">Outlook labels summarize the World Economic Forum's fastest-growing roles and skills and current hiring reports. Pay and demand vary by country and company.</p>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="wrap">
+      <div class="sec-head">
+        <p class="eyebrow">How this was built</p>
+        <h2>Borrowed from tools people actually finish</h2>
+      </div>
+      <div class="inspo">
+        <div><b>One question per screen</b><p>Like 16Personalities: a single card, a clear finish line, and keyboard shortcuts so it feels quick.</p></div>
+        <div><b>Your life first, job titles later</b><p>Like the O*NET Interest Profiler and CareerExplorer: you answer about everyday preferences, and the match comes from that.</p></div>
+        <div><b>A next step, not just a label</b><p>Like 80,000 Hours and roadmap.sh: every result ends with starter jobs, skills and three small first steps.</p></div>
+      </div>
+      <div class="hero-cta"><button class="btn" id="startBtn2">Find my fit →</button></div>
+    </div>
+  </section>
+</main>
+
+<!-- QUIZ -->
+<main id="quiz" hidden>
+  <div class="wrap">
+    <div class="quiz">
+      <div class="progress" id="progress" aria-hidden="true"></div>
+      <div id="qcard"></div>
+      <div class="qnav">
+        <button class="btn ghost small" id="backBtn">← Back</button>
+        <span class="hint">Press A–E to answer · ← to go back</span>
+      </div>
+      <p class="reassure" id="reassure"></p>
+    </div>
+  </div>
+</main>
+
+<!-- RESULTS -->
+<main id="results" hidden>
+  <div class="wrap" id="resWrap"></div>
+</main>
+
+<div class="wrap">
+  <footer>
+    <p>Next Commit is a reflection tool, not a prediction. Use your results to start conversations with mentors, your career center and people already doing the work.</p>
+    <p class="src">Sources:
+      <a href="https://www.weforum.org/press/2025/01/future-of-jobs-report-2025-78-million-new-job-opportunities-by-2030-but-urgent-upskilling-needed-to-prepare-workforces/" target="_blank" rel="noopener">WEF Future of Jobs 2025</a>
+      <a href="https://spectrum.ieee.org/ai-effect-entry-level-jobs" target="_blank" rel="noopener">IEEE Spectrum: AI and entry-level jobs</a>
+      <a href="https://www.onetcenter.org/IP.html" target="_blank" rel="noopener">O*NET Interest Profiler</a>
+      <a href="https://80000hours.org/" target="_blank" rel="noopener">80,000 Hours</a>
+      <a href="https://roadmap.sh/" target="_blank" rel="noopener">roadmap.sh</a>
+    </p>
+  </footer>
+</div>
+
+<div class="breathe" id="breathe" hidden role="dialog" aria-modal="true" aria-label="Breathing exercise">
+  <div class="breathe-box">
+    <div class="orb" id="orb"></div>
+    <p class="breathe-say" id="breatheSay">Breathe in</p>
+    <p class="breathe-sub" id="breatheSub">Box breathing · 4 seconds each</p>
+    <button class="btn ghost small" id="breatheClose">I'm good, back to it</button>
+  </div>
+</div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+(function(){
+const WORLDS={
+  build:{name:"Build the Tech",color:"var(--w-build)",desc:"Create, secure and run the technology. Includes tech services and IT firms."},
+  industry:{name:"Tech + an Industry",color:"var(--w-industry)",desc:"Use tech inside health, money, energy or manufacturing."},
+  people:{name:"People & Strategy",color:"var(--w-people)",desc:"Consulting, product and roles where you guide, teach or advise."},
+  own:{name:"Start Your Own",color:"var(--w-own)",desc:"Be your own boss as a founder, freelancer or indie maker."}
+};
+const WORLD_ORDER=["build","industry","people","own"];
+
+const C={
+ ai:{w:"build",name:"AI Builder",out:"Growing fast",
+  what:"Make apps smarter with AI: chatbots, assistants and tools that help people do things faster.",
+  day:"Try a new AI model, connect it to an app, then test whether its answers are actually right.",
+  jobs:["AI engineer","Machine learning engineer (junior)","AI app developer"],
+  skills:["Python","Using AI tools and APIs","Checking AI answers for mistakes","Curiosity"],
+  steps:["Build a small AI helper for something you do every day, like a study planner.","Post it on GitHub and LinkedIn with a short demo video.","Apply to new-grad AI engineer roles and AI startups."],
+  watch:"Lots of people want this job. Projects you've built will matter more than grades."},
+ cloud:{w:"build",name:"Cloud & Platform Engineer",out:"Growing",
+  what:"Keep the apps and websites everyone uses fast, safe and always online.",
+  day:"Set up servers in the cloud, automate boring tasks, and fix things when something breaks.",
+  jobs:["Cloud engineer","DevOps engineer","Graduate engineer at an IT services firm"],
+  skills:["One cloud: AWS, Azure or Google Cloud","Linux basics","Automating tasks","Staying calm under pressure"],
+  steps:["Start a beginner cloud certificate (many are free to study for).","Put your own website or app online using the cloud.","Apply to graduate programs at IT services firms and cloud companies."],
+  watch:"Some roles have on-call nights when systems go down."},
+ cyber:{w:"build",name:"Cyber Defender",out:"Growing fast",
+  what:"Protect people and companies from hackers, scams and data leaks.",
+  day:"Watch for suspicious activity, investigate alerts, and help teams fix weak spots.",
+  jobs:["Security analyst","Security operations (SOC) analyst","Risk and compliance analyst"],
+  skills:["How networks work","How attacks happen","Attention to detail","A starter security certificate"],
+  steps:["Try free hacking-practice games like picoCTF or TryHackMe.","Study for a beginner security certificate such as CompTIA Security+.","Apply to security analyst roles at banks, IT firms and government."],
+  watch:"You'll keep learning constantly, and some teams work shifts."},
+ data:{w:"build",name:"Data Detective",out:"Changing with AI",
+  what:"Find the story hiding in numbers and help teams make better decisions.",
+  day:"Pull data, spot patterns, make clear charts and explain what they mean.",
+  jobs:["Data analyst","Business intelligence analyst","Data engineer (junior)"],
+  skills:["SQL","Spreadsheets and charts","Asking good questions","Explaining numbers simply"],
+  steps:["Pick a public dataset you care about: sports, music or your city.","Make three charts that tell a story and post them.","Apply to analyst roles in almost any industry."],
+  watch:"AI now makes basic reports. People who ask sharp questions and explain the 'so what' stand out."},
+ health:{w:"industry",name:"Health Tech",out:"Growing fast",
+  what:"Use tech to help doctors, hospitals and patients, from health apps to AI that spots illness early.",
+  day:"Work with nurses or doctors to build tools that save them time and keep patients safe.",
+  jobs:["Software engineer at a hospital or health company","Health data analyst","Clinical informatics associate"],
+  skills:["Coding plus how healthcare works","Privacy rules like HIPAA","Working with non-tech experts","Caring about patients"],
+  steps:["Take a free intro course on healthcare data or digital health.","Build a simple health or habit tracker app.","Apply to hospital systems, health insurers and health tech startups."],
+  watch:"Healthcare moves carefully because lives are involved, so change can feel slow."},
+ fin:{w:"industry",name:"Fintech & Money Tech",out:"Growing",
+  what:"Build the tech behind banking, payments, investing and fraud protection.",
+  day:"Make payments faster and safer, or build tools that catch fraud before it happens.",
+  jobs:["Software engineer at a bank or fintech","Fraud analyst","Junior quant or data analyst"],
+  skills:["Coding","Money basics","Being careful and accurate","Working with numbers"],
+  steps:["Learn how a $5 card payment travels from your phone to the store.","Build a small budgeting or expense-splitting app.","Apply to bank technology programs and fintech companies."],
+  watch:"Banks have lots of rules and approvals. Fintech startups move faster but are riskier."},
+ climate:{w:"industry",name:"Climate Tech",out:"Growing fast",
+  what:"Use tech to fight climate change: smart power grids, electric vehicles and tracking pollution.",
+  day:"Analyze energy or weather data, or build software for solar, battery or EV companies.",
+  jobs:["Software engineer at a clean energy company","Energy data analyst","Sustainability analyst"],
+  skills:["Coding and data","Interest in energy and science","Patience with big, slow problems","Teamwork with engineers"],
+  steps:["Join a climate tech community like Climatebase or Work on Climate.","Do a project with public energy or weather data.","Apply to energy, EV, and climate software companies."],
+  watch:"Some climate startups depend on funding cycles. Larger energy companies are steadier."},
+ robot:{w:"industry",name:"Robotics & Smart Machines",out:"Growing fast",
+  what:"Write the code that makes robots, drones, cars and smart devices move and think.",
+  day:"Test code on real machines, tweak sensors, and watch your work move in the physical world.",
+  jobs:["Robotics software engineer","Embedded systems engineer","Autonomous vehicle engineer"],
+  skills:["Python or C++","Tinkering with hardware","Physics basics","Debugging patiently"],
+  steps:["Get an Arduino or Raspberry Pi kit and build something that moves.","Join a robotics club, hackathon or competition.","Apply to manufacturing, drone, warehouse automation and EV companies."],
+  watch:"Hardware takes longer to build than apps, and jobs cluster in certain cities."},
+ consult:{w:"people",name:"Tech Consultant",out:"Growing",
+  what:"Help many different companies figure out how to use tech and AI. New clients, new places, new problems.",
+  day:"Meet a client, break their problem into pieces, build a plan and present it.",
+  jobs:["Technology analyst or consultant","Solutions engineer","AI transformation analyst"],
+  skills:["Breaking big problems into small ones","Presenting","Teamwork","Learning new industries fast"],
+  steps:["Practice a few 'case interview' questions with friends.","Write a one-page idea for how a company you like could use AI.","Apply to analyst programs at consulting and IT services firms."],
+  watch:"Hours can be long and travel heavy. Decide early what you won't give up, like sleep or weekends."},
+ prod:{w:"people",name:"Product & UX Maker",out:"Growing",
+  what:"Figure out what to build and make it easy and fun to use. You're the bridge between users and engineers.",
+  day:"Talk to users, sketch ideas, decide what to build next, and work with engineers to ship it.",
+  jobs:["Associate product manager","UX designer","Product analyst"],
+  skills:["Listening to users","Simple design tools like Figma","Clear writing","Deciding what matters most"],
+  steps:["Redesign an app you find annoying and explain your choices.","Interview five people about a problem they have.","Apply to associate product manager programs and UX roles."],
+  watch:"Entry-level product jobs are competitive. Many people start as engineers or analysts and move over."},
+ trust:{w:"people",name:"AI Safety, Ethics & Policy",out:"Growing (new field)",
+  what:"Make sure AI and tech are fair, safe and used responsibly, at tech companies or in government.",
+  day:"Review how an AI system behaves, spot risks, and help write the rules teams follow.",
+  jobs:["Trust and safety analyst","AI risk or governance analyst","Government tech fellow"],
+  skills:["Knowing how AI works","Clear writing","Thinking about right and wrong","Understanding laws and rules"],
+  steps:["Read a beginner's guide to AI rules like the EU AI Act.","Write a short post about an AI problem you care about.","Apply to trust and safety teams and government digital service programs."],
+  watch:"It's a newer field, so job titles vary. Your tech skills make you stand out here."},
+ edu:{w:"people",name:"Tech Creator & Educator",out:"Growing",
+  what:"Teach and explain tech to others as a developer advocate, online creator, technical writer or coding instructor.",
+  day:"Make tutorials, run workshops, answer questions online and turn feedback into better guides.",
+  jobs:["Developer advocate","Technical writer","Coding instructor or teaching assistant"],
+  skills:["Explaining things simply","Writing or video","Enough coding to demo","Building a community"],
+  steps:["Make five short videos or posts explaining something you know well.","Help improve the docs of an open-source project.","Apply to developer relations, technical writing and edtech roles."],
+  watch:"Growing an audience takes time. Most people mix it with a regular tech job at first."},
+ founder:{w:"own",name:"Startup Founder",out:"Growing fast",
+  what:"Start your own company. With AI, a tiny team can now build what used to take dozens of people.",
+  day:"Talk to customers, build, sell, hire and fix whatever is broken that day.",
+  jobs:["Founder","Founding engineer at a new startup","Early employee at a startup"],
+  skills:["Talking to customers","Building fast with AI tools","Selling your idea","Bouncing back from 'no'"],
+  steps:["Save a few months of living costs, or join a startup first to learn.","Talk to 20 people about one problem before building anything.","Build a simple version in a month and get five people using it."],
+  watch:"Pay can be low or zero for a while, and most startups fail. Each try still teaches you a lot."},
+ indie:{w:"own",name:"Freelancer & Indie Maker",out:"Growing",
+  what:"Be your own boss: build apps, websites or AI tools for clients, or sell your own small products.",
+  day:"Choose your projects, work from anywhere, and handle clients, pricing and deadlines yourself.",
+  jobs:["Freelance developer","Indie app maker","AI automation freelancer"],
+  skills:["Finishing what you start","Simple marketing","Pricing your work","Managing your own money"],
+  steps:["Build three small projects for friends or local businesses.","Set up a simple portfolio site.","Land your first paid gig on a freelance platform."],
+  watch:"Income goes up and down, and there's no paid vacation or employer health plan."}
+};
+const ORDER=Object.keys(C);
+const LV="Levels.fyi",BLS="US Bureau of Labor Statistics";
+const X={
+ ai:{pay:"$100k–$170k",pay3:"$125k–$210k",title3:"ML Engineer II / Software Engineer II",
+  src:[["Payscale","https://www.payscale.com/research/US/Job=Machine_Learning_Engineer/Salary/36c7bc8a/Entry-Level"],[LV,"https://www.levels.fyi/companies/nvidia/salaries/software-engineer/title/machine-learning-engineer"],[BLS,"https://www.bls.gov/ooh/computer-and-information-technology/computer-and-information-research-scientists.htm"]],
+  cos:[["NVIDIA","Santa Clara, CA","https://nvidia.com/en-us/about-nvidia/careers/university-recruiting/","University recruiting"],["Databricks","San Francisco, CA","https://www.databricks.com/company/careers/university-recruiting","University recruiting"],["Microsoft","Redmond, WA","https://careers.microsoft.com/students/","Students & early career"]],
+  grow:[["Year 1","Ship features on a real AI product with a senior engineer reviewing your work. Learn how models fail and how to test them."],["Years 2–3","Own a feature end to end and mentor interns. Promotion to Engineer II is typical."],["Next doors","Senior AI engineer, AI product manager, founding engineer at an AI startup, or AI safety work."]]},
+ cloud:{pay:"$65k–$137k",payNote:"IT services firms start lower, big cloud companies higher",pay3:"$90k–$180k",title3:"Cloud Engineer II / SDE II / Associate",
+  src:[["Infosys job posting","https://digitalcareers.infosys.com/global-careers/company-job/description/reqid/145642BR"],[LV,"https://www.levels.fyi/companies/amazon/salaries/software-engineer"],[BLS,"https://www.bls.gov/ooh/computer-and-information-technology/software-developers.htm"]],
+  cos:[["Amazon Web Services","Seattle, WA","https://www.amazon.jobs/student-programs","Student programs"],["Infosys","Bengaluru, India","https://www.infosys.com/careers/graduates.html","Graduate programs"],["Cognizant","Teaneck, NJ","https://careers.cognizant.com/us-en/pathways-and-programs/students-and-emerging-talent/","Students & emerging talent"]],
+  grow:[["Year 1","Structured training (IT services firms often run multi-month bootcamps), then client or internal projects. Earn one or two cloud certificates."],["Years 2–3","Run a piece of a client's systems yourself and join the on-call rotation. Promotion to engineer II or associate."],["Next doors","Cloud architect, site reliability engineer, security engineer, or a move from a services firm to a product company, usually with a pay jump."]]},
+ cyber:{pay:"$67k–$100k",pay3:"$75k–$130k",title3:"Security Analyst II",
+  src:[["Payscale","https://www.payscale.com/research/US/Job=Information_Security_Analyst/Salary/630064a0/Entry-Level"],[LV,"https://www.levels.fyi/companies/crowdstrike/salaries/security-analyst"],[BLS,"https://www.bls.gov/ooh/computer-and-information-technology/information-security-analysts.htm"]],
+  cos:[["CrowdStrike","Austin, TX","https://www.crowdstrike.com/en-us/careers/university-interns/","University & interns"],["Palo Alto Networks","Santa Clara, CA","https://jobs.paloaltonetworks.com/en/early-in-career","Early in career"],["Cisco","San Jose, CA","https://careers.cisco.com/global/en/entry-level-careers","Entry-level careers"]],
+  grow:[["Year 1","Watch alerts in a security operations center, learn the tools, and investigate real incidents alongside a senior analyst."],["Years 2–3","Handle incidents on your own, earn a mid-level certificate, and pick a specialty: cloud security, threat hunting or penetration testing."],["Next doors","Security engineer, incident responder, ethical hacker or security architect. The field's median pay across all levels is about $129k."]]},
+ data:{pay:"$64k–$98k",payNote:"analysts at the low end, data engineers at the high end",pay3:"$70k–$126k",title3:"Data Analyst II / Senior Analyst / Data Engineer II",
+  src:[["Payscale","https://www.payscale.com/research/US/Job=Data_Analyst/Salary"],["Built In","https://builtin.com/salaries/us/data-engineer"],[BLS,"https://www.bls.gov/ooh/math/data-scientists.htm"]],
+  cos:[["Walmart Global Tech","Bentonville, AR","https://careers.walmart.com/students","Students"],["Snowflake","Menlo Park, CA","https://careers.snowflake.com/us/en/university","University"],["Salesforce","San Francisco, CA","https://www.salesforce.com/company/careers/university-recruiting/","Internships & new grad"]],
+  grow:[["Year 1","Build dashboards and answer business questions. Learn the company's data and who to ask about it."],["Years 2–3","Own one business area's numbers, use AI to automate routine reports, and present findings to leaders."],["Next doors","Data scientist, analytics engineer, data engineer or product manager."]]},
+ health:{pay:"$94k–$122k",payNote:"based on Epic; hospital IT roles can start lower",pay3:"$130k–$170k",title3:"Software Developer II",
+  src:[[LV,"https://www.levels.fyi/companies/epic/salaries/software-engineer"],["Payscale","https://www.payscale.com/research/US/Job=Software_Developer/Salary/94eea938/Epic-Systems-Corporation-Entry-Level"],[BLS,"https://www.bls.gov/ooh/computer-and-information-technology/software-developers.htm"]],
+  cos:[["Epic Systems","Verona, WI","https://careers.epic.com/Jobs","Careers"],["Optum / UnitedHealth Group","Minneapolis area, MN","https://careers.unitedhealthgroup.com/early-careers/programs/","Early careers"],["Kaiser Permanente","Oakland, CA","https://www.kaiserpermanentejobs.org/university","University programs"]],
+  grow:[["Year 1","Learn how hospitals and insurers really work, and ship features under strict privacy rules. You may visit clinics to watch your software in use."],["Years 2–3","Own features that doctors and nurses use every day. You'll speak both \"doctor\" and \"developer\"."],["Next doors","Clinical informatics, health AI, health tech startups or product roles. Your healthcare knowledge is hard to replace."]]},
+ fin:{pay:"$118k–$156k",payNote:"large banks and fintechs; smaller firms start lower",pay3:"$148k–$188k",title3:"Software Engineer / Senior Associate",
+  src:[[LV+" (JPMorgan Chase)","https://www.levels.fyi/companies/jpmorgan-chase/salaries/software-engineer/levels/associate/locations/united-states"],[LV+" (Capital One)","https://www.levels.fyi/companies/capital-one/salaries/software-engineer"],[LV+" (Stripe)","https://www.levels.fyi/companies/stripe/salaries/software-engineer"]],
+  cos:[["JPMorgan Chase","New York, NY","https://careers.jpmorgan.com/us/en/students/programs/emerging-talent-software-engineers-fulltime","Software engineer program"],["Capital One","McLean, VA","https://www.capitalonecareers.com/students","Students & grads"],["Stripe","San Francisco & Dublin","https://stripe.com/en-es/careers/emerging-talent","Emerging talent"]],
+  grow:[["Year 1","A training program or rotation with heavy focus on security and rules. You'll build internal tools or payment features."],["Years 2–3","Own systems that move real money. Promotion is typical, and bonuses matter in this industry."],["Next doors","Trading-systems developer, fraud and risk engineering, fintech startups or product roles."]]},
+ climate:{pay:"$92k–$120k",payNote:"Tesla and NextEra; startup pay varies",pay3:"$140k–$157k",title3:"Engineer / Software Engineer II",
+  src:[[LV+" (Tesla)","https://www.levels.fyi/companies/tesla/salaries/software-engineer"],[LV+" (NextEra)","https://www.levels.fyi/en-gb/companies/nextera-energy/salaries/software-engineer"]],
+  cos:[["Tesla","Austin, TX","https://www.tesla.com/careers/students","Internships"],["NextEra Energy","Juno Beach, FL","https://www.nexteraenergy.com/careers/join-our-team/internships.html","Internships"],["Enphase Energy","Fremont, CA","https://jobs.jobvite.com/enphase-energy/jobs","Open jobs"]],
+  grow:[["Year 1","Work on energy data, battery or power-grid software. Learn the science and rules behind it."],["Years 2–3","Own a system like EV charging or energy forecasting. Climate know-how is rare and valued."],["Next doors","Climate startups, energy analytics, EV and battery companies, or climate policy."]]},
+ robot:{pay:"$95k–$159k",payNote:"Boston-area typical up to Waymo",pay3:"$181k–$204k",title3:"Software Engineer II (Amazon, Waymo); smaller firms pay less",
+  src:[[LV+" (Boston entry level)","https://www.levels.fyi/t/software-engineer/levels/entry-level/locations/greater-boston-area"],[LV+" (Waymo)","https://www.levels.fyi/companies/waymo/salaries/software-engineer"],[LV+" (Amazon SDE II)","https://www.levels.fyi/es/companies/amazon/salaries/software-engineer/levels/sde-ii/locations/greater-boston-area"]],
+  cos:[["Boston Dynamics","Waltham, MA","https://bostondynamics.com/careers/","Careers & internships"],["Waymo","Mountain View, CA","https://waymo.com/join/","Careers"],["Amazon Robotics","Greater Boston, MA","https://amazon.jobs/content/en/career-programs/university","Students & grads"]],
+  grow:[["Year 1","Write code that runs on real machines, with lots of testing in labs or on test tracks."],["Years 2–3","Own one part of the robot's brain: how it sees, plans its moves, or controls its motors."],["Next doors","Senior robotics engineer, self-driving lead, hardware startups or factory automation."]]},
+ consult:{pay:"$83k–$115k",payNote:"plus signing and performance bonuses",pay3:"$121k–$164k",title3:"Consultant / Senior Consultant",
+  src:[[LV+" (Accenture)","https://www.levels.fyi/en-gb/companies/accenture/salaries/management-consultant/locations/united-states"],["Management Consulted","https://managementconsulted.com/consultant-salary/"],[LV+" (Deloitte)","https://www.levels.fyi/companies/deloitte/salaries/management-consultant"]],
+  cos:[["Accenture","Dublin, Ireland","https://www.accenture.com/us-en/careers/life-at-accenture/entry-level","Early careers"],["Deloitte","New York, NY (US firm)","https://www.deloitte.com/us/en/careers/students.html","Students"],["Boston Consulting Group","Boston, MA","https://careers.bcg.com/global/en/students","Early careers"]],
+  grow:[["Year 1","Join two to four client projects in different industries. Expect slides, spreadsheets, client meetings and frequent travel."],["Years 2–3","Promotion to Consultant or Senior Consultant. You lead a piece of the project and guide newer analysts."],["Next doors","Strategy or tech leadership roles at a company, product management, or staying on toward manager. The alumni network is a big perk."]]},
+ prod:{pay:"$130k–$145k",payNote:"big-tech APM programs; UX and smaller-company roles start lower",pay3:"$183k–$186k",title3:"Product Manager (Google, Meta)",
+  src:[[LV+" (Meta)","https://www.levels.fyi/companies/meta/salaries/product-manager/locations/united-states"],[LV+" (Google)","https://www.levels.fyi/company/Google/salaries/Product-Manager"],[LV+" (Adobe)","https://www.levels.fyi/companies/adobe/salaries/product-manager"]],
+  cos:[["Google","Mountain View, CA","https://www.google.com/about/careers/applications/students","Students (incl. APM)"],["Meta","Menlo Park, CA","https://www.metacareers.com/rotational-programs","Rotational programs"],["Adobe","San Jose, CA","https://careers.adobe.com/us/en/university","University"]],
+  grow:[["Year 1","Rotate across teams (in APM programs), write plans for new features, talk to users and ship small improvements."],["Years 2–3","Own a product area and its results. Promotion to Product Manager."],["Next doors","Senior PM, head of product at a startup, or founder. Product is a common springboard to starting a company."]]},
+ trust:{pay:"$55k–$95k",pay3:"$83k–$126k",title3:"Senior trust & safety or AI governance analyst (total pay)",
+  src:[["Glassdoor","https://www.glassdoor.com/Salaries/trust-safety-analyst-salary-SRCH_KO0,20.htm"],["Payscale","https://www.payscale.com/research/US/Job=Trust_and_Safety_Analyst/Salary/a8ba9b7a/Early-Career"],["TechCongress","https://techcongress.io/congressional-innovation-fellowship"]],
+  cos:[["Google","Mountain View, CA","https://www.google.com/about/careers/applications/students/","Students"],["Coding it Forward","Washington, DC","https://www.codingitforward.com/corps","Civic Innovation Corps"],["TechCongress","Washington, DC","https://techcongress.io/congressional-innovation-fellowship","Fellowship (after 2+ yrs)"]],
+  grow:[["Year 1","Review how content and AI systems behave, write safety guidelines, and work with engineers on protection tools. Many people start in an engineering or analyst role and move over."],["Years 2–3","Specialize in AI risk, child safety, elections or privacy. Fellowships like TechCongress ($78k) open up after about two years of work."],["Next doors","AI governance lead, policy advisor, government tech roles, or law and policy graduate school."]]},
+ edu:{pay:"$60k–$100k",pay3:"$90k–$137k",title3:"Developer Advocate / Senior Technical Writer (medians)",
+  src:[[BLS+" (technical writers)","https://www.bls.gov/ooh/media-and-communication/technical-writers.htm"],["Glassdoor (developer advocate)","https://www.glassdoor.com/Salaries/developer-advocate-salary-SRCH_KO0,18.htm"]],
+  cos:[["GitHub","San Francisco, CA","https://githubinc.jibeapply.com/early-in-profession","Early in profession"],["Khan Academy","Mountain View, CA (remote-first)","https://job-boards.greenhouse.io/khanacademy","Open roles"],["Coursera","Mountain View, CA","https://job-boards.greenhouse.io/coursera","Open roles"]],
+  grow:[["Year 1","Write docs, tutorials and sample apps, and speak at meetups. Many people start as an engineer or writer first."],["Years 2–3","Build a public reputation and own a developer community or course line."],["Next doors","Senior developer advocate, education product lead, your own creator business, or teaching."]]},
+ founder:{pay:"$75k–$105k",payNote:"as an early engineer at a seed startup, plus about 0.5%–4% equity",pay3:"$90k–$145k",title3:"Senior or founding engineer, plus equity",
+  src:[["TechCrunch (Kruze payroll data)","https://techcrunch.com/2024/12/04/132k-149k-heres-what-seed-stage-founders-pay-early-employees-based-on-data"],["Carta","https://carta.com/data/linkedin-founding-engineer-equity-1-54-percent/"]],
+  cos:[["Y Combinator Startup School","San Francisco, CA","https://startupschool.org/","Free course + co-founder match"],["YC Work at a Startup","San Francisco, CA","https://www.workatastartup.com/faq","Join a YC startup"],["a16z speedrun","Menlo Park, CA","https://speedrun.a16z.com/apply","Apply to the accelerator"]],
+  grow:[["Year 1","Wear every hat: code, customer support, sales demos. You'll learn faster than anywhere else, and things will be chaotic."],["Years 2–3","If the company grows, you lead a team. If it doesn't, you've packed several years of experience into two."],["Next doors","Start your own company, lead at a later-stage startup, or move to a big company with a strong story to tell."]]},
+ indie:{pay:"$25–$75/hr",payNote:"US junior freelance developer rates; income varies month to month",pay3:"$60–$100/hr",title3:"Established freelancer",
+  src:[["Upwork rate guide","https://www.upwork.com/resources/upwork-hourly-rates"],["index.dev","https://index.dev/blog/freelance-developer-rates"]],
+  cos:[["Upwork","Palo Alto, CA","https://support.upwork.com/hc/en-us/articles/24492534968211-Register-as-a-freelancer","Register as a freelancer"],["Fiverr","Tel Aviv, Israel","https://www.fiverr.com/start_selling","Start selling"],["Toptal","Fully remote","https://www.toptal.com/freelance-jobs","Apply (a later goal)"]],
+  grow:[["Year 1","Small gigs while you build reviews and a portfolio. Expect gaps between projects."],["Years 2–3","Repeat clients and referrals let you raise your rates. Some people turn their work into products, like templates or a small app."],["Next doors","Running a small agency, building your own app business, or senior contracting. Many freelancers also take full-time jobs when it suits them."]]}
+};
+const VALS=[["adv","Adventure"],["sec","Security"],["auto","Freedom"],["mast","Mastery"],["wealth","Money"],["bal","Balance"],["imp","Impact"]];
+
+const Q=[
+ {t:"Free time",q:"It's a free Saturday. What sounds best?",o:[
+  ["Exploring a new place or trying something new",{consult:2,founder:1,climate:1},{adv:2}],
+  ["Building or fixing something: a PC, a bike, a side project",{robot:3,cloud:1,indie:1},{mast:1}],
+  ["Hanging out with a big group of friends",{consult:1,prod:1,edu:2},{}],
+  ["Games, puzzles or a good mystery show",{cyber:2,data:2,ai:1},{mast:1}],
+  ["Volunteering or being outdoors",{climate:2,health:2,trust:1},{imp:2}]]},
+ {t:"Group projects",q:"In a group project, you're usually the one who…",o:[
+  ["Presents and keeps everyone pumped",{consult:2,edu:2,founder:1},{}],
+  ["Builds the actual thing while others talk",{ai:2,cloud:2,indie:1},{mast:1}],
+  ["Digs up facts and checks the numbers",{data:3,fin:1},{mast:1}],
+  ["Makes it look good and easy to use",{prod:3,indie:1},{}],
+  ["Spots what could go wrong before it does",{cyber:3,trust:2},{sec:1}]]},
+ {t:"Interests",q:"Besides coding, which class did you actually enjoy?",o:[
+  ["Math or statistics",{data:2,fin:2,ai:1},{}],
+  ["Biology, psychology or anything about health",{health:3,prod:1},{imp:1}],
+  ["Economics or business",{fin:2,consult:2,founder:1},{wealth:1}],
+  ["Physics, environment or engineering",{climate:2,robot:2},{}],
+  ["Writing, design, philosophy or social studies",{trust:2,edu:2,prod:1},{}]]},
+ {t:"Helping out",q:"A friend texts you for help. Which ask would you enjoy most?",o:[
+  ["\"My laptop is acting weird, can you look?\"",{cloud:2,cyber:1,robot:1},{mast:1}],
+  ["\"Is this message a scam?\"",{cyber:3,trust:1},{}],
+  ["\"My small business needs more customers. Ideas?\"",{consult:2,founder:2,data:1},{}],
+  ["\"Can you explain this thing I don't get?\"",{edu:3,ai:1},{}],
+  ["\"Can you help me design my app idea?\"",{prod:2,indie:2},{}]]},
+ {t:"Travel",q:"How much travel do you want in your job?",o:[
+  ["Lots! A new city every month sounds amazing.",{consult:3},{adv:3}],
+  ["A few fun work trips a year",{prod:1,health:1,fin:1,ai:1},{bal:1}],
+  ["Very little. I like my routine and my people.",{cloud:1,data:1,cyber:1},{sec:1,bal:2}],
+  ["I want to work from anywhere: beach, mountains, hometown",{indie:3,edu:1},{auto:2}]]},
+ {t:"Money",q:"Which money situation sounds best at age 30?",o:[
+  ["A steady, good paycheck and savings. No stress.",{cloud:2,cyber:1,health:1},{sec:3}],
+  ["A big paycheck, even if work is intense",{fin:2,consult:2,ai:1},{wealth:3}],
+  ["Less money now, but a shot at something huge later",{founder:3},{wealth:2,auto:1}],
+  ["Enough to live well, with lots of free time",{indie:2,edu:1,data:1},{bal:3}]]},
+ {t:"Surprises",q:"Your plans suddenly change. How do you feel?",o:[
+  ["Excited. Surprises keep life fun.",{founder:2,consult:1,indie:1},{adv:1,auto:1}],
+  ["Fine. I'll figure it out as I go.",{prod:1,ai:1,robot:1,climate:1},{}],
+  ["I'd rather have a clear plan and stick to it",{cloud:1,fin:1,health:1,data:1},{sec:2}],
+  ["Stressed. I like knowing what's coming.",{cyber:1,trust:1,data:1},{sec:3}]]},
+ {t:"Work-life balance",q:"Pick your ideal work week.",o:[
+  ["9 to 5, then my time is all mine",{data:1,cloud:1,health:1,trust:1},{bal:3}],
+  ["Some crazy-busy weeks, then calm ones",{consult:2,fin:1},{wealth:1}],
+  ["Flexible hours. I work when I feel creative.",{indie:2,edu:2,prod:1},{auto:2}],
+  ["Long hours are fine if I love what I'm building",{founder:2,ai:2,robot:1},{mast:1}]]},
+ {t:"Pride",q:"What would make you proudest five years from now?",o:[
+  ["I helped people get healthier or stay safe",{health:3,cyber:1},{imp:2}],
+  ["I started something that's mine",{founder:3,indie:2},{auto:2}],
+  ["I helped protect the planet",{climate:3},{imp:3}],
+  ["Millions of people use something I built",{ai:2,prod:2,cloud:1},{imp:1}],
+  ["I taught or inspired lots of people",{edu:3,trust:1},{imp:2}]]},
+ {t:"Home base",q:"Where do you picture yourself living?",o:[
+  ["A big, busy city",{consult:2,fin:2,founder:1},{adv:1,wealth:1}],
+  ["Close to family and friends",{health:1,cloud:1,data:1,trust:1},{sec:1,bal:2}],
+  ["Anywhere, as long as the Wi-Fi is good",{indie:2,edu:1,ai:1},{auto:1}],
+  ["Somewhere new every few years",{robot:1,climate:1,consult:1},{adv:2}]]},
+ {t:"Learning",q:"How do you like to learn new things?",o:[
+  ["Watch a video, then just try it",{indie:1,robot:2,ai:1},{auto:1}],
+  ["Take a course and earn a certificate",{cloud:3,cyber:2},{sec:1}],
+  ["Learn from a mentor who shows me the ropes",{health:1,fin:2,consult:1},{}],
+  ["Read deeply and keep asking \"why?\"",{data:2,trust:2,ai:1},{mast:2}],
+  ["Explain it to someone else until it clicks",{edu:3,prod:1},{}]]},
+ {t:"AI and you",q:"When you use AI apps like ChatGPT, you mostly…",o:[
+  ["Wonder how they actually work inside",{ai:3,data:1},{mast:2}],
+  ["Use them to get stuff done faster",{indie:1,consult:1,prod:1,cloud:1},{}],
+  ["Worry about mistakes, privacy or misuse",{trust:3,cyber:2},{imp:1}],
+  ["Think up ideas for a new app or business",{founder:2,prod:1,indie:1},{auto:1}],
+  ["Use them to learn things for school or life",{edu:2,health:1},{}]]},
+ {t:"Cool factor",q:"Which of these makes you go \"whoa, cool\"?",o:[
+  ["Robots, drones and self-driving cars",{robot:3,ai:1},{}],
+  ["Solar farms and electric cars",{climate:3,robot:1},{imp:1}],
+  ["A smartwatch that spots health problems early",{health:3,data:1},{}],
+  ["Paying for anything with one tap on your phone",{fin:3,cyber:1},{}],
+  ["An app so easy your grandma loves it",{prod:3,indie:1},{}]]},
+ {t:"Team vibe",q:"What kind of team sounds best?",o:[
+  ["A tiny crew where everyone does a bit of everything",{founder:2,indie:1,robot:1},{auto:1}],
+  ["A big company with mentors and a clear path up",{cloud:2,fin:1,health:1,data:1},{sec:2}],
+  ["New teams and new people every few months",{consult:3},{adv:1}],
+  ["Any team, as long as the mission matters to me",{climate:1,trust:2,health:1,edu:1},{imp:2}]]},
+ {t:"Speaking up",q:"How do you feel about presenting in front of people?",o:[
+  ["Love it. Give me the mic.",{consult:2,edu:2,founder:1},{}],
+  ["Fine, if I know the topic well",{prod:2,trust:1,fin:1},{}],
+  ["I'd rather let my work speak for me",{ai:1,cloud:1,cyber:1,data:1,robot:1},{mast:1}]]}
+];
+
+const REASSURE=[
+ "Go with your gut. Your first answer is usually the honest one.",
+ "None of these is a trap. Every option leads somewhere good.",
+ "You're not signing anything. This just shows where your instincts point.",
+ "Halfway there. You're doing great.",
+ "If two answers fit, pick the one you'd want on a hard week.",
+ "Almost done. Your results come with real next steps."
+];
+const VIBES={
+  anxious:"That makes sense. The job market is noisy right now. We'll keep this short and end with three small next steps, because having a plan usually helps more than reading more headlines.",
+  lost:"Feeling lost after graduating is really common, AI or no AI. These questions are about how you like to live, which is easier to answer than \"what job do I want?\"",
+  curious:"Good place to start. Notice which answers you feel strongly about. Those are your real priorities showing.",
+  excited:"Love that. Let's point that energy at careers where you'll grow fastest.",
+  numb:"Fair. Finishing school and job hunting take a lot out of you. Four minutes, no essays, and you can stop anytime."
+};
+
+const $=s=>document.querySelector(s);
+const store={get(k){try{return JSON.parse(localStorage.getItem("nc2_"+k))}catch(e){return null}},set(k,v){try{localStorage.setItem("nc2_"+k,JSON.stringify(v))}catch(e){}}};
+let answers=store.get("answers")||[];
+let idx=0, vibe=store.get("vibe"), filter="all";
+
+/* home: worlds + explorer */
+$("#worlds").innerHTML=WORLD_ORDER.map(k=>`<div class="world" style="--wc:${WORLDS[k].color}"><b>${WORLDS[k].name}</b><span>${WORLDS[k].desc}</span></div>`).join("");
+function renderFilters(){
+  $("#filters").innerHTML=[["all","All 14"],...WORLD_ORDER.map(k=>[k,WORLDS[k].name])].map(([k,l])=>`<button class="chip" data-f="${k}" aria-pressed="${filter===k}">${l}</button>`).join("");
+  document.querySelectorAll("[data-f]").forEach(b=>b.addEventListener("click",()=>{filter=b.dataset.f;renderFilters();renderGrid()}));
+}
+function careerCard(k){const c=C[k],w=WORLDS[c.w];return `<article class="career" style="--wc:${w.color}">
+  <div class="top-row"><span class="tag">${w.name}</span><span class="outlook">${c.out}</span></div>
+  <h3>${c.name}</h3><p>${c.what}</p>
+  ${X[k]?`<p class="career-pay"><b>${X[k].pay}</b> starting · <b>${X[k].pay3}</b> after 1–3 yrs</p>
+  <div class="career-cos">${X[k].cos.map(co=>`<a href="${co[2]}" target="_blank" rel="noopener" title="${co[0]} · HQ ${co[1]}"><span class="mono sm" style="--mc:${w.color}" aria-hidden="true">${initials(co[0])}</span>${co[0]}</a>`).join("")}</div>`:""}
+  <p class="jobs">${c.jobs.join(" · ")}</p></article>`}
+function renderGrid(){$("#careerGrid").innerHTML=ORDER.filter(k=>filter==="all"||C[k].w===filter).map(careerCard).join("")}
+renderFilters();renderGrid();
+
+/* views */
+function show(view){
+  ["home","quiz","results"].forEach(v=>$("#"+v).hidden=v!==view);
+  window.scrollTo(0,0);
+  const h=view==="home"?"":"#"+view; if(location.hash!==h){history.replaceState(null,"",h||location.pathname)}
+}
+function complete(){return answers.length===Q.length&&answers.every(a=>a!=null)}
+function route(){
+  const h=location.hash.slice(1);
+  if(h==="results"&&complete()){renderResults();show("results")}
+  else if(h==="quiz"){startQuiz(false)}
+  else show("home");
+}
+$("#resumeBtn").hidden=!complete();
+
+document.querySelectorAll("[data-vibe]").forEach(b=>b.addEventListener("click",()=>{vibe=b.dataset.vibe;store.set("vibe",vibe);paintVibe()}));
+function paintVibe(){document.querySelectorAll("[data-vibe]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.vibe===vibe));if(vibe)$("#vibeReply").textContent=VIBES[vibe];}
+paintVibe();
+
+/* quiz */
+function startQuiz(reset){
+  if(reset){answers=[];store.set("answers",answers)}
+  idx=Math.min(answers.filter(a=>a!=null).length,Q.length-1);
+  show("quiz");renderQ();
+}
+["#startBtn","#startBtn2"].forEach(s=>$(s).addEventListener("click",()=>startQuiz(true)));
+$("#resumeBtn").addEventListener("click",()=>{renderResults();show("results")});
+$("#logoBtn").addEventListener("click",()=>{$("#resumeBtn").hidden=!complete();show("home")});
+
+function renderQ(){
+  const q=Q[idx];
+  $("#progress").innerHTML=Q.map((_,i)=>`<i class="${i<idx?'done':i===idx?'now':''}"></i>`).join("");
+  $("#qcard").innerHTML=`<div class="card-in">
+    <div class="qmeta"><span class="qnum">${String(idx+1).padStart(2,"0")} / ${Q.length}</span><span class="qtopic">${q.t}</span></div>
+    <h2 class="qtitle" id="qt">${q.q}</h2>
+    <div class="opts" role="radiogroup" aria-labelledby="qt">
+      ${q.o.map((o,i)=>`<button class="opt" role="radio" id="opt${i}" aria-checked="${answers[idx]===i}" data-i="${i}"><span class="k">${"ABCDE"[i]}</span><span>${o[0]}</span></button>`).join("")}
+    </div></div>`;
+  $("#qcard").querySelectorAll(".opt").forEach(b=>b.addEventListener("click",()=>pick(+b.dataset.i)));
+  $("#backBtn").textContent=idx===0?"← Home":"← Back";
+  $("#reassure").textContent=REASSURE[Math.min(REASSURE.length-1,Math.floor(idx*REASSURE.length/Q.length))];
+  const first=$("#qcard .opt[aria-checked='true']")||$("#qcard .opt");first&&first.focus({preventScroll:true});
+}
+let locking=false;
+function pick(i){
+  if(locking||i>=Q[idx].o.length)return;locking=true;
+  answers[idx]=i;store.set("answers",answers);
+  $("#qcard").querySelectorAll(".opt").forEach(b=>b.setAttribute("aria-checked",+b.dataset.i===i));
+  setTimeout(()=>{locking=false;
+    if(idx<Q.length-1){idx++;renderQ()}
+    else{selected=null;renderResults();show("results");$("#resumeBtn").hidden=false}
+  },260);
+}
+function back(){if(idx===0){show("home")}else{idx--;renderQ()}}
+$("#backBtn").addEventListener("click",back);
+document.addEventListener("keydown",e=>{
+  if($("#quiz").hidden||!$("#breathe").hidden||e.metaKey||e.ctrlKey||e.altKey)return;
+  const m="ABCDE".indexOf(e.key.toUpperCase());
+  if(m>-1&&e.key.length===1){pick(m)}
+  else if(["1","2","3","4","5"].includes(e.key)){pick(+e.key-1)}
+  else if(e.key==="ArrowLeft"){back()}
+});
+
+/* scoring */
+function score(ans){
+  const s={},max={},v={},vmax={};
+  ORDER.forEach(k=>{s[k]=0;max[k]=0});VALS.forEach(([k])=>{v[k]=0;vmax[k]=0});
+  Q.forEach((q,qi)=>{
+    ORDER.forEach(k=>max[k]+=Math.max(...q.o.map(o=>o[1][k]||0)));
+    VALS.forEach(([k])=>vmax[k]+=Math.max(...q.o.map(o=>o[2][k]||0)));
+    const a=ans[qi];if(a==null)return;const o=q.o[a];
+    for(const k in o[1])s[k]+=o[1][k];for(const k in o[2])v[k]+=o[2][k];
+  });
+  const pct={};ORDER.forEach(k=>pct[k]=Math.round(100*s[k]/max[k]));
+  const vp={};VALS.forEach(([k])=>vp[k]=vmax[k]?v[k]/vmax[k]:0);
+  const ranked=[...ORDER].sort((a,b)=>pct[b]-pct[a]||s[b]-s[a]);
+  const wp={};WORLD_ORDER.forEach(w=>{const m=ORDER.filter(k=>C[k].w===w).map(k=>pct[k]).sort((a,b)=>b-a);wp[w]=Math.round(m.slice(0,2).reduce((x,y)=>x+y,0)/Math.min(2,m.length))});
+  const wranked=[...WORLD_ORDER].sort((a,b)=>wp[b]-wp[a]);
+  return {pct,vp,ranked,wp,wranked};
+}
+window.NextCommit={Q,C,score};
+
+function radar(vp,color){
+  const W=320,c=W/2,R=110,n=VALS.length;
+  const pt=(i,r)=>{const a=-Math.PI/2+i*2*Math.PI/n;return [c+r*Math.cos(a),c+r*Math.sin(a)]};
+  let g="";
+  [.25,.5,.75,1].forEach(f=>{g+=`<polygon points="${VALS.map((_,i)=>pt(i,R*f).join(",")).join(" ")}" fill="none" stroke="var(--line)" stroke-width="1"/>`});
+  VALS.forEach((_,i)=>{const[x,y]=pt(i,R);g+=`<line x1="${c}" y1="${c}" x2="${x}" y2="${y}" stroke="var(--line)"/>`});
+  const poly=VALS.map(([k],i)=>pt(i,R*Math.max(.06,vp[k])).join(",")).join(" ");
+  g+=`<polygon points="${poly}" fill="${color}" fill-opacity=".22" stroke="${color}" stroke-width="2.5" stroke-linejoin="round"/>`;
+  VALS.forEach(([k],i)=>{const[x,y]=pt(i,R*Math.max(.06,vp[k]));g+=`<circle cx="${x}" cy="${y}" r="4" fill="${color}"/>`});
+  VALS.forEach(([k,l],i)=>{const[x,y]=pt(i,R+22);const anchor=Math.abs(x-c)<8?"middle":x>c?"start":"end";g+=`<text x="${x}" y="${y+5}" text-anchor="${anchor}" font-size="14" font-family="Figtree, system-ui, sans-serif" font-weight="600" fill="var(--ink)">${l}</text>`});
+  return `<svg viewBox="-60 -10 440 340" role="img" aria-label="Your priorities chart">${g}</svg>`;
+}
+
+let saved=store.get("saved")||[];
+let checks=store.get("checks")||{};
+function initials(n){const w=n.replace(/[()&.,]/g," ").split(/\s+/).filter(Boolean);return (w.length>1?w[0][0]+w[1][0]:w[0].slice(0,2)).toUpperCase()}
+function coCard(co,w){
+  const [name,hq,url,label]=co;const on=saved.includes(name);
+  return `<div class="co"><div class="co-head"><span class="mono" style="--mc:${WORLDS[w].color}" aria-hidden="true">${initials(name)}</span><div style="min-width:0"><div class="co-name">${name}</div><div class="co-hq">HQ: ${hq}</div></div></div>
+  <div class="co-links"><a href="${url}" target="_blank" rel="noopener">${label||"Student programs"} ↗</a><button class="star" data-save="${name}" aria-pressed="${on}">${on?"Saved":"Save"}</button></div></div>`;
+}
+document.addEventListener("click",e=>{
+  const b=e.target.closest("[data-save]");if(!b)return;
+  const n=b.dataset.save;saved=saved.includes(n)?saved.filter(x=>x!==n):[...saved,n];store.set("saved",saved);
+  document.querySelectorAll(`[data-save="${CSS.escape(n)}"]`).forEach(x=>{const on=saved.includes(n);x.setAttribute("aria-pressed",on);x.textContent=on?"Saved":"Save"});
+  const sl=$("#shortlist");if(sl)sl.innerHTML=shortlistHTML();
+});
+function shortlistHTML(){return saved.length?saved.map(s=>`<span>${s}</span>`).join(""):`<span>Nothing saved yet. Tap "Save" on the company cards above.</span>`}
+
+const IV={
+  ai:"Coding interviews (data structures, Python) plus questions about how you'd use or test an AI model. Practice 2 problems a day on LeetCode or NeetCode and be ready to demo your AI project.",
+  cloud:"Coding basics plus 'how would you set this up?' questions: deploying an app, fixing an outage, Linux commands. Your cloud certificate and a live project carry a lot of weight.",
+  cyber:"Questions on networking, common attacks and how you'd investigate an alert. Talk through a CTF challenge you solved, step by step.",
+  data:"A SQL test, a spreadsheet or chart exercise, and 'what would you recommend?' questions. Practice explaining a chart in plain English in under a minute.",
+  health:"Coding interviews plus questions on why healthcare and how you'd protect patient data. Show you care about the users: nurses, doctors and patients.",
+  fin:"Coding interviews, sometimes a numbers or logic test, and questions on accuracy and risk. Know the basics of how payments or trading work.",
+  climate:"Coding or data exercises plus 'why climate?' Show a project with real energy, weather or emissions data and what you learned.",
+  robot:"Coding (often C++ or Python), plus questions on sensors, math and debugging hardware. Bring photos or video of something you built that moves.",
+  consult:"Case interviews: a business problem you solve out loud with structure. Do 10–15 practice cases with a partner, plus behavioral stories about teamwork.",
+  prod:"Product sense ('improve this app'), simple metrics questions and behavioral stories. Practice with 5 apps you use daily and a short design portfolio if going UX.",
+  trust:"A writing sample or policy exercise, questions on AI risks and real cases you've followed, plus how you'd balance safety and usefulness.",
+  edu:"A portfolio review of your posts or videos, sometimes a live 'teach us something' demo. Pick a topic and practice explaining it in five minutes.",
+  founder:"Investors and accelerators ask what problem you solve, who has it and what proof you have. Bring numbers: users, interviews, sign-ups.",
+  indie:"Clients judge your portfolio and reviews. Keep three polished projects, clear prices and fast, friendly replies."
+};
+function seasonTip(){
+  const m=new Date().getMonth();
+  if(m>=7&&m<=10)return "Right now (August to November) is peak recruiting season. Large companies are reviewing internship and new-grad applications for next year, so apply this month.";
+  if(m===11||m<=1)return "Right now (December to February), big programs are filling up, but many still have openings, and smaller companies and startups are hiring for spring and summer. Keep applying.";
+  return "Right now (March to July) is off-season for big-company programs. Target startups, mid-size firms and local companies, which hire year-round, and get your materials ready for August, when big programs open.";
+}
+function guideHTML(k){
+  const c=C[k];const cos=X[k]?X[k].cos.map(x=>x[0]):[];
+  const steps=[
+   ["Lock your target","Day 1",`<p>Go after <b>${c.name}</b> first, with your #2 match as a backup. Search job boards for: ${c.jobs.map(j=>`"${j}"`).join(", ")}.</p>`],
+   ["Fix your resume in one evening","Week 1",`<ul><li>One page. Put projects and internships first, coursework last.</li><li>Each bullet: what you did + a number ("cut load time 40%").</li><li>Copy words from job posts into your skills: ${c.skills.slice(0,3).join(", ")}.</li><li>Get one free review at your campus career center.</li></ul>`],
+   ["Build one proof project","Weeks 1–4",`<p>${c.steps[0]} Put it at the top of your resume and LinkedIn. One finished project beats five half-done ones.</p>`],
+   ["Shortlist 8–10 places","Week 2",`<p>Save the companies above that you like, then add mid-size and local firms in the same field. Smaller companies get fewer applications per role.</p><div class="shortlist" id="shortlist">${shortlistHTML()}</div>`],
+   ["Know the calendar","Now",`<p>${seasonTip()}</p>`],
+   ["Ask for referrals","Weeks 2–6",`<p>A referral can move your application to the top of the pile. Message 3 alumni or LinkedIn connections at your shortlisted companies.</p><div class="tmpl" id="refTmpl">Hi [Name], I'm a recent [School] CS grad interested in ${c.jobs[0].toLowerCase()} roles at [Company]. I saw you work on [team]. Could I ask you two quick questions about your experience? If it seems like a fit, I'd also be grateful for a referral. Thanks so much!</div><p style="margin-top:8px"><button class="btn ghost small" id="copyTmpl">Copy message</button></p>`],
+   ["Apply and track","Weekly",`<ul><li>Aim for 5–10 tailored applications a week, not 100 copy-pastes.</li><li>Track company, role, date, contact and status in a simple spreadsheet.</li><li>No reply in 10 days? Send one short, polite follow-up.</li></ul>`],
+   ["Prep for this kind of interview","Before each interview",`<p>${IV[k]}</p>`],
+   ["Compare and negotiate offers","When offers arrive",`<ul><li>Compare base pay, bonus, stock, location and what you'll learn in year one.</li><li>It's normal to ask politely: "Is there flexibility on the base salary?"</li><li>Check pay ranges for your city on Levels.fyi or Glassdoor before you answer.</li></ul>`]
+  ];
+  const done=steps.filter((_,i)=>checks[k+"_"+i]).length;
+  return `<div class="guide-top"><div class="sec-head" style="margin:0"><p class="eyebrow">Your application game plan · ${c.name}</p><h2>From quiz to offer in 9 steps</h2><p class="lede">Check off steps as you go. Your progress is saved in this browser.</p></div>
+    <div><p class="src-note" id="gcount">${done} of ${steps.length} done</p><div class="meter"><i id="gmeter" style="width:${Math.round(100*done/steps.length)}%"></i></div></div></div>
+  <ol class="guide">${steps.map((s,i)=>{const id=k+"_"+i,on=!!checks[id];return `<li class="gstep ${on?'done':''}"><input type="checkbox" id="g_${id}" data-g="${id}" ${on?"checked":""} aria-label="Mark step ${i+1} done"><div><h3><label for="g_${id}">${i+1}. ${s[0]}</label><span class="when">${s[1]}</span></h3>${s[2]}</div></li>`}).join("")}</ol>`;
+}
+function wireGuide(k){
+  const total=document.querySelectorAll("[data-g]").length;
+  document.querySelectorAll("[data-g]").forEach(cb=>cb.addEventListener("change",()=>{
+    checks[cb.dataset.g]=cb.checked;store.set("checks",checks);cb.closest(".gstep").classList.toggle("done",cb.checked);
+    const d=[...document.querySelectorAll("[data-g]")].filter(x=>x.checked).length;$("#gcount").textContent=`${d} of ${total} done`;$("#gmeter").style.width=Math.round(100*d/total)+"%";
+  }));
+  const ct=$("#copyTmpl");if(ct)ct.addEventListener("click",()=>{const t=$("#refTmpl").textContent;try{navigator.clipboard.writeText(t).then(()=>toast("Message copied"),()=>fallback(t))}catch(e){fallback(t)}});
+}
+
+let selected=null;
+function detail(k,pct){
+  const c=C[k],w=WORLDS[c.w];
+  return `<div style="--wc:${w.color};display:grid;gap:16px">
+    <div class="grid2">
+      <div class="panel"><p class="eyebrow">${w.name} · ${c.out} · ${pct}% match</p><h3>${c.name}</h3><p class="lede">${c.what}</p><p><b>A day might look like:</b> ${c.day}</p></div>
+      <div class="panel"><h3>Starter jobs to search for</h3><ul class="clean roles">${c.jobs.map(j=>`<li>${j}</li>`).join("")}</ul><h3 style="margin-top:6px">Skills to build</h3><div class="skills">${c.skills.map(s=>`<span>${s}</span>`).join("")}</div></div>
+    </div>
+    ${X[k]?`<div class="panel"><div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:baseline"><h3>Where to apply: internships &amp; new-grad programs</h3><span class="src-note">Save companies to build your shortlist</span></div>
+      <div class="cos">${X[k].cos.map(co=>coCard(co,c.w)).join("")}</div>
+      <p class="src-note">Examples, not endorsements. Links go to each organization's own careers page; programs open and close through the year. Initials stand in for company logos.</p></div>
+    <div class="grid2">
+      <div class="panel"><h3>Pay if you land the job (US)</h3>
+        <div class="pay"><div><small>Starting salary</small><span class="amt">${X[k].pay}</span><small>${X[k].payNote||"base, before bonus or stock"}</small></div><div><small>After 1–3 years</small><span class="amt">${X[k].pay3}</span><small>${X[k].title3}</small></div></div>
+        <p class="src-note">Ranges vary a lot by city and company: big-tech and big-city offers sit at the top, smaller firms and lower-cost cities lower. Source: ${X[k].src.map(s=>`<a href="${s[1]}" target="_blank" rel="noopener">${s[0]}</a>`).join(", ")}.</p></div>
+      <div class="panel"><h3>If you spend 1–3 years there</h3>
+        <ul class="clean growth">${X[k].grow.map(g=>`<li><b>${g[0]}</b><span>${g[1]}</span></li>`).join("")}</ul></div>
+    </div>`:""}
+    <div class="panel"><h3>Three small first steps</h3>
+      <div class="steps">${c.steps.map((s,i)=>`<div><b>${["This month","Next month","Month three"][i]}</b><p>${s}</p></div>`).join("")}</div>
+      <p class="watch"><b style="color:var(--ink)">Good to know:</b> ${c.watch}</p>
+    </div></div>`;
+}
+
+function renderResults(){
+  const {pct,vp,ranked,wp,wranked}=score(answers);
+  const top=C[ranked[0]], tw=WORLDS[top.w];
+  const top3=ranked.slice(0,3);
+  if(!selected||!top3.includes(selected))selected=top3[0];
+  const why=Q.map((q,qi)=>({q,qi,w:(q.o[answers[qi]][1][ranked[0]]||0)})).filter(x=>x.w>=2).sort((a,b)=>b.w-a.w).slice(0,4);
+  const topVals=[...VALS].sort((a,b)=>vp[b[0]]-vp[a[0]]).slice(0,3).map(v=>v[1]);
+  const vibeLine={anxious:"You said you felt anxious at the start.",lost:"You said you felt lost at the start.",numb:"You said you were worn out at the start."}[vibe];
+  $("#resWrap").innerHTML=`
+  <div class="res-hero" style="--wc:${tw.color}">
+    <div>
+      <p class="eyebrow">Your top match · ${pct[ranked[0]]}%</p>
+      <h1>Your best fit: <span>${top.name}</span></h1>
+      <p class="lede">${top.what}</p>
+      <p class="lede" style="margin-top:10px">You also fit <b>${C[ranked[1]].name}</b> and <b>${C[ranked[2]].name}</b>. Having several good options is a strength, not a problem.</p>
+      ${vibeLine?`<p class="lede" style="margin-top:10px">${vibeLine} Remember, you don't have to decide your whole life today. Pick one small step below and start there.</p>`:""}
+    </div>
+    <div class="bars" aria-label="Match by world">
+      <p class="bars-title">Your best-fit worlds</p>
+      ${wranked.map((w,i)=>`<div class="bar ${i===0?'top':''}" style="--wc:${WORLDS[w].color}"><span class="name">${WORLDS[w].name}</span><span class="track"><span class="fill" data-w="${wp[w]}"></span></span><span class="pct">${wp[w]}%</span></div>`).join("")}
+    </div>
+  </div>
+
+  <section class="block">
+    <div class="sec-head"><p class="eyebrow">Your top 3 careers</p><h2>Tap each one to explore it</h2></div>
+    <div class="top3" role="tablist">${top3.map((k,i)=>`<button class="pick" role="tab" data-k="${k}" aria-selected="${k===selected}" style="--wc:${WORLDS[C[k].w].color}"><span class="rank"><span>#${i+1} · ${WORLDS[C[k].w].name}</span><span>${pct[k]}%</span></span><b>${C[k].name}</b></button>`).join("")}</div>
+    <div id="detail">${detail(selected,pct[selected])}</div>
+  </section>
+
+  <section class="block" id="guideSec">${guideHTML(selected)}</section>
+
+  <section class="block" style="--wc:${tw.color}">
+    <div class="grid2">
+      <div class="panel">
+        <p class="eyebrow">Why ${top.name} fits you</p>
+        <h3>Your answers that pointed here</h3>
+        <ul class="clean why">${(why.length?why:Q.slice(0,3).map((q,qi)=>({q,qi}))).map(x=>`<li><small>${x.q.t}</small>${x.q.o[answers[x.qi]][0]}</li>`).join("")}</ul>
+      </div>
+      <div class="panel">
+        <p class="eyebrow">What matters to you</p>
+        <h3>Your top priorities: ${topVals.join(", ")}</h3>
+        <div class="radar-wrap">${radar(vp,tw.color)}
+          <div class="vals">${VALS.map(([k,l])=>`<div><span>${l}</span><b>${Math.round(vp[k]*100)}</b></div>`).join("")}</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="sec-head"><p class="eyebrow">All 14 careers</p><h2>Everything else, ranked for you</h2><p class="lede">Lower matches aren't "bad." They just line up less with what you said today.</p></div>
+    <div class="allrank">${ranked.map((k,i)=>`<div class="bar ${i<3?'top':''}" style="--wc:${WORLDS[C[k].w].color}"><span class="name">${C[k].name}<span class="sub">${WORLDS[C[k].w].name}</span></span><span class="track"><span class="fill" data-w="${pct[k]}"></span></span><span class="pct">${pct[k]}%</span></div>`).join("")}</div>
+  </section>
+
+  <section class="block">
+    <div class="door">
+      <div><h3>This is a two-way door.</h3><p>Your first job isn't forever. Most early-career moves can be undone, and the skills from every career here carry over to the others. Pick the one that excites you for the next two years, give it a real try, and check in again.</p></div>
+      <div class="res-actions">
+        <button class="btn" id="copyBtn">Copy my result</button>
+        <button class="btn ghost" id="retakeBtn">Retake</button>
+      </div>
+    </div>
+  </section>`;
+  requestAnimationFrame(()=>requestAnimationFrame(()=>document.querySelectorAll(".fill").forEach(f=>f.style.width=f.dataset.w+"%")));
+  document.querySelectorAll(".pick").forEach(b=>b.addEventListener("click",()=>{
+    selected=b.dataset.k;document.querySelectorAll(".pick").forEach(x=>x.setAttribute("aria-selected",x.dataset.k===selected));
+    $("#detail").innerHTML=detail(selected,pct[selected]);
+    $("#guideSec").innerHTML=guideHTML(selected);wireGuide(selected);
+  }));
+  wireGuide(selected);
+  $("#retakeBtn").addEventListener("click",()=>{selected=null;startQuiz(true)});
+  $("#copyBtn").addEventListener("click",()=>{
+    const txt=`My Next Commit results: 1) ${C[ranked[0]].name} (${pct[ranked[0]]}%), 2) ${C[ranked[1]].name}, 3) ${C[ranked[2]].name}. Best-fit world: ${WORLDS[wranked[0]].name}. My top priorities: ${topVals.join(", ")}. First step: ${top.steps[0]}`;
+    const ok=()=>toast("Copied. Paste it anywhere.");
+    try{navigator.clipboard.writeText(txt).then(ok,()=>fallback(txt))}catch(e){fallback(txt)}
+  });
+}
+function fallback(t){const ta=document.createElement("textarea");ta.value=t;document.body.appendChild(ta);ta.select();try{document.execCommand("copy");toast("Copied. Paste it anywhere.")}catch(e){toast("Select the text to copy it")}ta.remove()}
+function toast(m){const t=$("#toast");t.textContent=m;t.hidden=false;clearTimeout(t._h);t._h=setTimeout(()=>t.hidden=true,2200)}
+
+/* breather */
+let bt=null;
+const PH=[["Breathe in",true],["Hold",true],["Breathe out",false],["Hold",false]];
+$("#breatheBtn").addEventListener("click",()=>{
+  $("#breathe").hidden=false;let step=0;const total=8;
+  const tick=()=>{if(step>=total){$("#breatheSay").textContent="Nice. You're doing fine.";$("#breatheSub").textContent="Ready when you are";$("#orb").classList.remove("big");return}
+    const [say,big]=PH[step%4];$("#breatheSay").textContent=say;$("#orb").classList.toggle("big",big);$("#breatheSub").textContent=`Round ${Math.floor(step/4)+1} of 2 · 4 seconds`;step++;bt=setTimeout(tick,4000)};
+  tick();$("#breatheClose").focus();
+});
+function closeB(){clearTimeout(bt);$("#breathe").hidden=true;$("#orb").classList.remove("big")}
+$("#breatheClose").addEventListener("click",closeB);
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!$("#breathe").hidden)closeB()});
+
+window.addEventListener("hashchange",route);
+route();
+})();
+</script>
+</body></html>
